@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Elements xmlns="http://schemas.microsoft.com/sharepoint/">
+  <CustomAction
+    Id="Ribbon.Documents.CustomGroup"
+    Sequence="11"
+    RegistrationType="List"
+    RegistrationId="101"
+    Location="CommandUI.Ribbon">
+    <CommandUIExtension>
+      <CommandUIDefinitions>
+        <CommandUIDefinition
+          Location="Ribbon.Documents.Groups._children">
+          <Group
+            Id="Ribbon.Documents.Archive"
+            Sequence="55"
+            Description="Archivation Group"
+            Title="Архивирование"
+            Command="EnableArchiveGroup"
+            Template="Ribbon.Templates.Flexible2">
+            <Controls Id="Ribbon.Documents.Archive.Controls">
+              <Button
+                Id="Ribbon.Documents.Archive.ArchiveSelected"
+                Command="ArchiveSelected"
+                Image32by32="http://icons.iconarchive.com/icons/apathae/wren/32/Documents-icon.png"
+                LabelText="Ручной выбор"
+                TemplateAlias="o2"
+                Sequence="15" />
+              <Button
+                Id="Ribbon.Documents.Archive.ArchiveByDate"
+                Command="ArchiveItemsByDate"
+                Image32by32="http://icons.iconarchive.com/icons/dakirby309/simply-styled/32/Calendar-icon.png"
+                LabelText="Автоматический выбор"
+                TemplateAlias="o2"
+                Sequence="18" />
+            </Controls>
+          </Group>
+        </CommandUIDefinition>
+        <CommandUIDefinition
+          Location="Ribbon.Documents.Scaling._children">
+          <MaxSize
+            Id="Ribbon.Documents.Scaling.Archive.MaxSize"
+            Sequence="15"
+            GroupId="Ribbon.Documents.Archive"
+            Size="LargeLarge" />
+        </CommandUIDefinition>
+      </CommandUIDefinitions>
+      <CommandUIHandlers>
+        <CommandUIHandler
+          Command="EnableArchiveGroup"
+          CommandAction="javascript:return true;" />
+        <CommandUIHandler
+          Command="ArchiveSelected"
+          CommandAction="javascript:
+                 /* получаем контекст текущего сайта*/
+                 var ctx = new SP.ClientContext.get_current();
+                 var items = SP.ListOperation.Selection.getSelectedItems(ctx);
+                 var myItems = '';
+                 /* получаем коллекцию выбранных Айтемов */
+                 for (var k in items) {
+                   myItems += items[k].id + ' ';
+                 }
+                 /* формируем свойства вызываемого модального окна */
+                 var options = {  
+                      url: 'http://vizatech.westeurope.cloudapp.azure.com/sites/dev/_layouts/15/BusinessLevel/ArchivationViewPage.aspx?Ids='+myItems,  
+                      title: 'Модуль архивации выбранных записей',  
+                      allowMaximize: false,  
+                      showClose: true,  
+                      width: 600,  
+                      height: 400,  
+                      dialogReturnValueCallback: Function.createDelegate(null, function(result, returnValue) {  
+                          if (result == SP.UI.DialogResult.OK) {  
+                              if (returnValue == null) {  
+                                  SP.UI.Notify.addNotification('Operation successful');  
+                                  SP.UI.ModalDialog.RefreshPage(SP.UI.DialogResult.OK);  
+                              } else {  location.href = returnValue;  }  
+                          }  
+                      })  
+                 };  
+                 /* вызываем модальное окно */
+                 SP.SOD.execute('sp.ui.dialog.js', 'SP.UI.ModalDialog.showModalDialog', options);
+        " />
+        <CommandUIHandler
+          Command="ArchiveItemsByDate"
+          CommandAction="javascript:
+          /* формируем свойства вызываемого модального окна */
+          var options = {  
+            url: 'http://vizatech.westeurope.cloudapp.azure.com/sites/dev/_layouts/15/BusinessLevel/ArchivationViewPage.aspx?Action=1',  
+            title: 'Модуль архивации по дате',  
+            allowMaximize: false,  
+            showClose: true,  
+            width: 600,  
+            height: 400,  
+            dialogReturnValueCallback: Function.createDelegate(null, function(result, returnValue) {  
+              if (result == SP.UI.DialogResult.OK) {  
+                if (returnValue == null) {  
+                  SP.UI.Notify.addNotification('Operation successful');  
+                  SP.UI.ModalDialog.RefreshPage(SP.UI.DialogResult.OK);  
+                } else {  
+                location.href = returnValue;  
+                }  
+              }  
+            })  
+          };  
+          /* вызываем модальное окно */
+          SP.SOD.execute('sp.ui.dialog.js', 'SP.UI.ModalDialog.showModalDialog', options);" />
+      </CommandUIHandlers>
+    </CommandUIExtension>
+  </CustomAction>
+</Elements>
